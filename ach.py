@@ -28,10 +28,10 @@ class ACH:
         return e.sn
 
     def get_h_cells(self, hypo):
-        return (cell for _, cell in self.matrix[hypo].items())
+        return (cell for cell in self.matrix[hypo].values())
 
     def get_e_cells(self, evidence):
-        return (row[evidence] for _, row in self.matrix.items())
+        return (row[evidence] for row in self.matrix.values())
 
     def rate(self, h, e, rating):
         if not self.matrix[h].get(e):
