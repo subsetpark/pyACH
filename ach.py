@@ -1,4 +1,4 @@
-import itertools, math, collections
+import itertools, math, collections, copy
 
 # Constants
 VERY_C = 0
@@ -43,6 +43,9 @@ class ACH:
 
     def score(self, hypo):
         return sum(cell.score() for cell in self.get_h_cells(hypo))
+
+    def duplicate(self):
+        return copy.deepcopy(self)
 
 class Evidence:
     def __init__(self, ach, sn, content, cred=None, rel=None):
