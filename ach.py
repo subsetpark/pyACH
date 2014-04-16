@@ -15,15 +15,17 @@ class ACH:
         self.matrix = {}
         self.hypotheses = {}
         self.evidences = {}
+        self.h_serializer = itertools.count()
+        self.e_serializer = itertools.count()
 
     def add_hypothesis(self, content=None):
-        h = Hypothesis(self, content)
+        h = Hypothesis(self, 'H' + str(next(self.h_serializer)), content)
         self.hypotheses[h.sn] = h
         self.matrix[h.sn] = {}
         return h.sn
 
     def add_evidence(self, cred=None, rel=None, content=None):
-        e = Evidence(self, content, cred=cred, rel=rel)
+        e = Evidence(self, 'E' + str(next(self.e_serializer)), content, cred=cred, rel=rel)
         self.evidences[e.sn] = e
         return e.sn
 
@@ -35,7 +37,7 @@ class ACH:
 
     def rate(self, h, e, rating):
         if not self.matrix[h].get(e):
-            self.matrix[h][e] = Cell( self.hypotheses[h], self.evidences[e], rating=rating)
+            self.matrix[h][e] = Cell(self.hypotheses[h], self.evidences[e], rating=rating)
         else:
             self.matrix[h][e].rating = rating
 
@@ -43,9 +45,8 @@ class ACH:
         return sum(cell.score() for cell in self.get_h_cells(hypo))
 
 class Evidence:
-    serializer = itertools.count()
-    def __init__(self, ach, content, cred=None, rel=None):
-        self.sn = 'E'+str(next(Evidence.serializer))
+    def __init__(self, ach, sn, content, cred=None, rel=None):
+        self.sn = sn
         self.credibility = cred
         self.relevance = rel
         self.content = content
@@ -77,9 +78,9 @@ class Hypothesis:
     2.0000000000000004
     """
 
-    serializer = itertools.count()
-    def __init__(self, ach, content):
-        self.sn = 'H'+str(next(Hypothesis.serializer))
+    
+    def __init__(self, ach, sn, content):
+        self.sn = sn
         self.content = content
         self.ach = ach
 
