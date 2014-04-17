@@ -15,23 +15,34 @@ Current session: {{ session }}
 {% for e in es %}
 <li>{{ e.sn }}: {{ e.content}}</li>
 {% endfor %}
+</ul>
+<ul>
+{% for h in hs %}
+<li>{{ h.sn }}: {{ h.content}}</li>
+{% endfor %}
+</ul>
+
 <script>
 $(document).ready(function(){
 	$("#newevi").click(function(data, status){
+		var hypo_num = 0;
 		$.get("/get_hypotheses", function(data, status){
-			var hypo_num = Object.keys(data).length
-			console.log(hypo_num)
+			hypo_num = Object.keys(data).length
 		})
 		$.get("/add_evidence", function(data, status){
-			console.log(data)
-			$("#comp_hypothesis_table").append($("<tr>")
+				var row = ($("<tr>")
 				.append($("<td>").append(data.e_sn))
 				.append($("<td>").append($("<input>").attr("type", "text")))
 				.append($("<td>")
 				.append("<select><option value='low'>Low</option><option value='medium'>Medium</option><option value=high>High</option>"))
 				.append($("<td>")
 				.append("<select><option value='low'>Low</option><option value='medium'>Medium</option><option value=high>High</option>"))
+
 			);
+			for (i=0; i<hypo_num; i++){
+				row.append($("<td>"));
+			}
+			$("#comp_hypothesis_table").append(row)
 		});
 	});
 });
@@ -40,43 +51,7 @@ $(document).ready(function(){
 
 </script>
 <table id="comp_hypothesis_table">
-<!-- 	<tr>
-		<th>Hypothesis no</th>
-		<th>Enter Hypothesis</th>
-		<th>Credibility</th>
-		<th>Relevance</th>
-		<th>H: 1</th>
-		<th>H: 2</th>
-	</tr>	
-	<tr>
-		<td id="hypothesis_no"></td>
-		<td id="enter_hypothesis">
-			<input type="text" name = "hyp">
-		</td>
-		<td id="credibility">
-			<select>
-  				<option value="volvo">Volvo</option>
-  				<option value="saab">Saab</option>
- 				<option value="mercedes">Mercedes</option>
-  				<option value="audi">Audi</option>
-			</select>
-		</td>
-		<td id="relevance">
-			
-		</td>
-		<td id="h1"></td>
-		<td id="h2"></td>
-	</tr>	 -->
 </table>
-
-<ul id = "list"></ul>
-</ul>
-<button id="newevi">submit</button>
-
-<ul>
-{% for h in hs %}
-<li>{{ h.sn }}: {{ h.content}}</li>
-{% endfor %}
-</ul>
+<button id="newevi">Add Evidence</button>
 
 {% endblock %}

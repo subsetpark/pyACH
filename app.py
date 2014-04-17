@@ -44,6 +44,8 @@ def new_session():
 def get_hypotheses():
     if current().hypotheses:
         return jsonify({sn: {'sn': sn, 'content': h.content} for sn, h in current().hypotheses.items()})
+    else:
+        return jsonify({})
 
 @app.route("/get_evidences")
 def get_evidences():
