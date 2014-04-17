@@ -4,16 +4,16 @@
 
 Current session: {{ session }}
 <h2>Evidence</h2>
-<ol>
+<ul>
 {% for e in es %}
 <li>{{ e.sn }}: {{ e.content}}</li>
 {% endfor %}
-</ol>
+</ul>
 <h2>Hypotheses</h2>
-<ol>
+<ul>
 {% for h in hs %}
 <li>{{ h.sn }}: {{ h.content}}</li>
 {% endfor %}
-</ol>
+</ul>
 
 {% endblock %}
