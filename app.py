@@ -8,6 +8,9 @@ app.config.from_object(__name__)
 
 ach.DEBUG = True
 
+def current():
+    return workspaces[session['current']]
+
 with open('ach_db', 'rb') as f:
     try:
         workspaces = pickle.load(f)
@@ -18,13 +21,12 @@ with open('ach_db', 'rb') as f:
 def index():
     if 'workspaces' not in session or session['current'] not in workspaces:
         new_session()
-    current = workspaces[session['current']]
     with open('ach_db', 'wb') as f:
         pickle.dump(workspaces, f)
 
-    return render_template("app.html", session=current.sn, 
-                                       es=({'sn': e.sn, 'content': e.content} for e in current.evidences.values()), 
-                                       hs=({'sn': h.sn, 'content': h.content} for h in current.hypotheses.values()))
+    return render_template("app.html", session=current().sn, 
+                                       es=({'sn': e.sn, 'content': e.content} for e in current().evidences.values()), 
+                                       hs=({'sn': h.sn, 'content': h.content} for h in current().hypotheses.values()))
 
 @app.route("/new_session")
 def new_session():
@@ -38,16 +40,27 @@ def new_session():
         return jsonify(success=True)
     return redirect(url_for('index'))
 
+@app.route("/get_hypotheses")
+def get_hypotheses():
+    if current().hypotheses:
+        return jsonify({sn: {'sn': sn, 'content': h.content} for sn, h in current().hypotheses.items()})
+
+@app.route("/get_evidences")
+def get_evidences():
+    if current().evidences:
+        return jsonify({sn: {'sn': sn, 'content': e.content, 'credibility': e.credibility, 'relevance': e.relevance} 
+                    for sn, e in current().evidences.items()})
+
 @app.route("/hypo_score")
 def hypo_score():
-    h_score = workspaces[session['current']].get_score(request.args.get('hypo'))
+    h_score = current().get_score(request.args.get('hypo'))
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return jsonify(h_score=h_score)
     return redirect(h_score)
 
 @app.route("/add_hypothesis")
 def add_hypo():
-    h_sn = workspaces[session['current']].add_hypothesis()
+    h_sn = current().add_hypothesis()
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return jsonify(h_sn=h_sn)
     return redirect(url_for('index'))
@@ -56,42 +69,42 @@ def add_hypo():
 def name_hypo():
     hypo = request.args.get('hypo')
     content = request.args.get('content')
-    workspaces[session['current']].hypotheses[hypo].content = content
+    current().hypotheses[hypo].content = content
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return jsonify(success=True)
     return redirect(url_for('index'))
 
 @app.route("/add_evidence")
 def add_evidence():
-    e_sn = workspaces[session['current']].add_evidence()
+    e_sn = current().add_evidence()
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return jsonify(e_sn=e_sn)
     return redirect(url_for('index'))
 
 @app.route("/name_evidence")
 def name_evidence():
-    workspaces[session['current']].evidences[request.args.get('evidence')] = request.args.get('content')
+    current().evidences[request.args.get('evidence')].content = request.args.get('content')
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return jsonify(success=True)
     return redirect(url_for('index'))
 
 @app.route("/set_cred")
 def set_cred():
-    workspaces[session['current']].evidences[request.args.get('evidence')].credibility = request.args.get('cred', type=float) 
+    current().evidences[request.args.get('evidence')].credibility = request.args.get('cred', type=float) 
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return jsonify(success=True)
     return redirect(url_for('index'))
 
 @app.route("/set_rel")
 def set_rel():
-    workspaces[session['current']].evidences[request.args.get('evidence')].relevance = request.args.get('rel', type=float)
+    current().evidences[request.args.get('evidence')].relevance = request.args.get('rel', type=float)
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return jsonify(success=True)
     return redirect(url_for('index'))
 
 @app.route("/set_consistency")
 def set_consistency():
-    workspaces[session['current']].rate(request.args.get('h'), request.args.get('e'), request.args.get('rating'))
+    current().rate(request.args.get('h'), request.args.get('e'), request.args.get('rating'))
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return jsonify(success=True)
     return redirect(url_for('index'))
