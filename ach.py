@@ -9,24 +9,47 @@ MEDIUM = 1
 HIGH = math.sqrt(2)
 LOW = math.sqrt(2) / 2
 
+DEBUG = False
+
+session_id = itertools.count()
 
 class ACH:
     def __init__(self):
+        self.sn = 'A' + str(next(session_id))
         self.matrix = {}
         self.hypotheses = {}
         self.evidences = {}
         self.h_serializer = itertools.count()
         self.e_serializer = itertools.count()
+        if DEBUG:
+            print("created new ACH session {}".format(self.sn))
+
+    def debug(self):
+        print("""
+            {} current state
+            evidence: {}
+            hypotheses: {}
+            matrix: {}
+            """.format(self.sn, self.evidences, self.hypotheses, self.matrix))
+
+    def __str__(self):
+        return "Analysis of Competing Hypotheses: \n{}\n".format(" ".join(self.hypotheses), " ".join(self.evidences))
 
     def add_hypothesis(self, content=None):
         h = Hypothesis(self, 'H' + str(next(self.h_serializer)), content)
         self.hypotheses[h.sn] = h
         self.matrix[h.sn] = {}
+        if DEBUG:
+            print("adding hypothesis {}: {}".format(h.sn, h.content))
+            self.debug()
         return h.sn
 
     def add_evidence(self, cred=None, rel=None, content=None):
         e = Evidence(self, 'E' + str(next(self.e_serializer)), content, cred=cred, rel=rel)
         self.evidences[e.sn] = e
+        if DEBUG:
+            print("adding evidence {}: {}".format(e.sn, e.content))
+            self.debug()
         return e.sn
 
     def get_h_cells(self, hypo):
@@ -40,8 +63,11 @@ class ACH:
             self.matrix[h][e] = Cell(self.hypotheses[h], self.evidences[e], rating=rating)
         else:
             self.matrix[h][e].rating = rating
+        if DEBUG:
+            print("rating {}:{} as {}".format(h, e, rating))
+            self.debug()
 
-    def score(self, hypo):
+    def get_score(self, hypo):
         return sum(cell.score() for cell in self.get_h_cells(hypo))
 
     def duplicate(self):
@@ -75,9 +101,9 @@ class Hypothesis:
     >>> a.rate('H1', 'E1', VERY_C)
     >>> a.rate('H0', 'E0', VERY_C)
     >>> a.rate('H0', 'E1', CONSISTENT)
-    >>> a.score('H0')
+    >>> a.get_score('H0')
     0.0
-    >>> a.score('H1')
+    >>> a.get_score('H1')
     2.0000000000000004
     """
 
@@ -99,7 +125,7 @@ class Cell:
         self.hypo = hypo
         self.rating = rating
 
-    def score(self):
+    def get_score(self):
         return self.evidence.relevance * self.evidence.credibility * self.rating
 
 if __name__ == "__main__":

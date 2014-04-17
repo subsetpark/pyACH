@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+Current session: {{ session }}
+<h2>Evidence</h2>
+<ol>
+{% for e in es %}
+<li>{{ e.sn }}: {{ e.content}}</li>
+{% endfor %}
+</ol>
+<h2>Hypotheses</h2>
+<ol>
+{% for h in hs %}
+<li>{{ h.sn }}: {{ h.content}}</li>
+{% endfor %}
+</ol>
+
+{% endblock %}
