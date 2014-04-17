@@ -34,46 +34,67 @@ def new_session():
     workspaces[workspace.sn] = workspace
     session['workspaces'].append(workspace.sn)
     session['current'] = workspace.sn
-    return jsonify(success=True)
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify(success=True)
+    return redirect(url_for('index'))
 
 @app.route("/hypo_score")
 def hypo_score():
-    return jsonify(h_score=workspaces[session['current']].get_score(request.args.get('hypo')))
+    h_score = workspaces[session['current']].get_score(request.args.get('hypo'))
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify(h_score=h_score)
+    return redirect(h_score)
 
 @app.route("/add_hypothesis")
 def add_hypo():
-    return jsonify(h_sn=workspaces[session['current']].add_hypothesis())
+    h_sn = workspaces[session['current']].add_hypothesis()
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify(h_sn=h_sn)
+    return redirect(url_for('index'))
 
 @app.route("/name_hypo")
 def name_hypo():
     hypo = request.args.get('hypo')
     content = request.args.get('content')
     workspaces[session['current']].hypotheses[hypo].content = content
-    return jsonify(success=True)
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify(success=True)
+    return redirect(url_for('index'))
 
 @app.route("/add_evidence")
 def add_evidence():
-    return jsonify(e_sn=workspaces[session['current']].add_evidence())
+    e_sn = workspaces[session['current']].add_evidence()
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify(e_sn=e_sn)
+    return redirect(url_for('index'))
 
 @app.route("/name_evidence")
 def name_evidence():
     workspaces[session['current']].evidences[request.args.get('evidence')] = request.args.get('content')
-    return jsonify(success=True)
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify(success=True)
+    return redirect(url_for('index'))
 
 @app.route("/set_cred")
 def set_cred():
     workspaces[session['current']].evidences[request.args.get('evidence')].credibility = request.args.get('cred', type=float) 
-    return jsonify(success=True)
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify(success=True)
+    return redirect(url_for('index'))
 
 @app.route("/set_rel")
 def set_rel():
     workspaces[session['current']].evidences[request.args.get('evidence')].relevance = request.args.get('rel', type=float)
-    return jsonify(success=True)
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify(success=True)
+    return redirect(url_for('index'))
 
 @app.route("/set_consistency")
 def set_consistency():
     workspaces[session['current']].rate(request.args.get('h'), request.args.get('e'), request.args.get('rating'))
-    return jsonify(success=True)
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify(success=True)
+    return redirect(url_for('index'))
 
 @app.route("/switch_session")
 def switch_session():
@@ -83,6 +104,7 @@ def switch_session():
         return jsonify(success=True)
     else:
         return jsonify(success=False)
+        return redirect(url_for('index'))
 
 if __name__ == "__main__":
     app.debug = True
