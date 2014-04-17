@@ -1,3 +1,5 @@
+#! /usr/bin/env python3
+
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, escape
 import ach, pickle
 
