@@ -17,7 +17,7 @@ def index():
     current = workspaces[session['current']]
     with open('ach_db', 'wb') as f:
         pickle.dump(workspaces, f)
-        
+
     return render_template("app.html", session=current.sn, 
                                        es=({'sn': e.sn, 'content': e.content} for e in current.evidences.values()), 
                                        hs=({'sn': h.sn, 'content': h.content} for h in current.hypotheses.values()))
@@ -82,5 +82,6 @@ def switch_session():
 
 if __name__ == "__main__":
     app.debug = True
-    app.secret_key = '4(\x1a\x8c_\x06\xef\xd40\xf8\x12\xf0\xc4\x08\x06\x04l\xc8\xc6\x01\xd0\xec\r\x86'
+    import credentials
+    app.secret_key = credentials.key
     app.run()
