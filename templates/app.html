@@ -23,6 +23,18 @@ Current session: {{ session }}
 </ul>
 
 <script>
+
+$(document).ready(function(){
+	$("#newhypo").click(function(data, status){
+		$.get("/add_hypothesis", function(data, status){
+			$("#comp_hypothesis_table thead tr").append($("<th>").append(data.h_sn));
+			$("#comp_hypothesis_table tbody tr").append($("<td>"))
+		})
+
+	})
+
+})
+
 $(document).ready(function(){
 	$("#newevi").click(function(data, status){
 		var hypo_num = 0;
@@ -40,18 +52,29 @@ $(document).ready(function(){
 
 			);
 			for (i=0; i<hypo_num; i++){
-				row.append($("<td>"));
+				row.append($("<td>"))
 			}
-			$("#comp_hypothesis_table").append(row)
-		});
-	});
-});
+			$("#comp_hypothesis_table tbody").append(row)
+		})
+	})
+})
 
 
 
 </script>
 <table id="comp_hypothesis_table">
+<thead>
+<tr>
+<th>Evidence no</th>
+<th>Enter Evidence</th>
+<th>Credibility</th>
+<th>Relevance</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
 </table>
 <button id="newevi">Add Evidence</button>
+<button id="newhypo">New Hypothesis</button>
 
 {% endblock %}
