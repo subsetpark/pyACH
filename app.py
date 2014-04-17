@@ -5,10 +5,12 @@ app = Flask(__name__)
 app.config.from_object(__name__)
 
 ach.DEBUG = True
-workspaces = {}
 
 with open('ach_db', 'rb') as f:
-    workspaces = pickle.load(f)
+    try:
+        workspaces = pickle.load(f)
+    except EOFError:
+        workspaces = {}
 
 @app.route("/")
 def index():
