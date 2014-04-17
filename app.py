@@ -40,16 +40,27 @@ def new_session():
         return jsonify(success=True)
     return redirect(url_for('index'))
 
+@app.route("/get_hypotheses")
+def get_hypotheses():
+    if current().hypotheses:
+        return jsonify({sn: {'sn': sn, 'content': h.content} for sn, h in current().hypotheses.items()})
+
+@app.route("/get_evidences")
+def get_evidences():
+    if current().evidences:
+        return jsonify({sn: {'sn': sn, 'content': e.content, 'credibility': e.credibility, 'relevance': e.relevance} 
+                    for sn, e in current().evidences.items()})
+
 @app.route("/hypo_score")
 def hypo_score():
-    h_score = workspaces[session['current']].get_score(request.args.get('hypo'))
+    h_score = current().get_score(request.args.get('hypo'))
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return jsonify(h_score=h_score)
     return redirect(h_score)
 
 @app.route("/add_hypothesis")
 def add_hypo():
-    h_sn = workspaces[session['current']].add_hypothesis()
+    h_sn = current().add_hypothesis()
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return jsonify(h_sn=h_sn)
     return redirect(url_for('index'))
