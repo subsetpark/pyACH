@@ -108,6 +108,6 @@ def switch_session():
 
 if __name__ == "__main__":
     app.debug = True
-    import credentials
-    app.secret_key = credentials.key
+    # import credentials
+    app.secret_key = "credentials.key"
     app.run()
