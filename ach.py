@@ -52,6 +52,13 @@ class ACH:
             self.debug()
         return e.sn
 
+    def name_evidence(self, evidence, content):
+        self.evidences[evidence].content = content
+        if DEBUG:
+            print("naming evidence {}: {}".format(self.evidences[evidence],
+                                                  self.evidences[evidence].content))
+            self.debug()
+
     def get_h_cells(self, hypo):
         return (cell for cell in self.matrix[hypo].values())
 
