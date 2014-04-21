@@ -9,19 +9,11 @@ table,th,td
 border:1px solid black;
 }
 </style>
-
-Current session: {{ session }}
-<ul>
-{% for e in es %}
-<li>{{ e.sn }}: {{ e.content}}</li>
-{% endfor %}
-</ul>
-<ul>
-{% for h in hs %}
-<li>{{ h.sn }}: {{ h.content}}</li>
-{% endfor %}
-</ul>
-
+<button id="newsess">New Session</button>
+<div id="session_title">
+</div>
+<div id="session_select">
+</div>
 <div id="comp_table">
 <table id="comp_hypothesis_table">
 </table>
@@ -42,8 +34,15 @@ function name_e(){
 	}
 
 
-function render_table(app_state){
+function redraw(app_state){
 		console.log(app_state)
+		var selecter = $("<select>").append("id", "session_select")
+		for (var a in app_state.sessions){
+			sn = "A" + a
+ 			selecter.append($("<option>").attr("value", sn).append(sn))
+		}
+		$("#session_select").replaceWith(selecter)
+		$("#session_title").replaceWith($("<div>").attr("id", "session_title").append(app_state.session))
 		var table = ($("<table>").attr("id", "comp_hypothesis_table")
 			.append($("<thead>")
 			.append($("<tr>")
@@ -78,13 +77,31 @@ function render_table(app_state){
 
 $("#newevi").click(function(data, status){
 		$.get("/add_evidence", function(app_state, app_status){
-			render_table(app_state)
+			redraw(app_state)
 		})
 	})
 
 $("#newhypo").click(function(data, status){
 	$.get("/add_hypothesis", function(app_state){
-		render_table(app_state)
+		redraw(app_state)
+	})
+})
+$("#newsess").click(function(data, status){
+	$.get("/new_session", function(app_state){
+		redraw(app_state)
+	})
+})
+$("#session_select").select(function(data, status){
+	console.log("FIRE")
+	var next_sess = $("#session_select").val()
+	var obj = { 
+		session : next_sess
+		}	
+	$.get("/switch_session", obj, redraw)
+})
+$(document).ready(function(){
+	$.get("/get_state", function(app_state){
+		redraw(app_state)
 	})
 })
 </script>
