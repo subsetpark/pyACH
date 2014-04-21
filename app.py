@@ -8,6 +8,15 @@ app.config.from_object(__name__)
 
 ach.DEBUG = True
 
+def app_state():
+    d = {}
+    d['sessions'] = list(workspaces.keys())
+    d['session'] = session['current']
+    d['evidences'] = {sn: {'sn': sn, 'content': e.content, 'credibility': e.credibility, 'relevance': e.relevance} 
+                    for sn, e in current().evidences.items()}
+    d['hypotheses'] = {sn: {'sn': sn, 'content': h.content} for sn, h in current().hypotheses.items()}
+    return d
+
 def current():
     return workspaces[session['current']]
 
@@ -37,21 +46,12 @@ def new_session():
     session['workspaces'].append(workspace.sn)
     session['current'] = workspace.sn
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return jsonify(success=True)
-    return redirect(url_for('index'))
+        return jsonify(app_state())
+    return redirect(url_for('index'))    
 
-@app.route("/get_hypotheses")
-def get_hypotheses():
-    if current().hypotheses:
-        return jsonify({sn: {'sn': sn, 'content': h.content} for sn, h in current().hypotheses.items()})
-    else:
-        return jsonify({})
-
-@app.route("/get_evidences")
-def get_evidences():
-    if current().evidences:
-        return jsonify({sn: {'sn': sn, 'content': e.content, 'credibility': e.credibility, 'relevance': e.relevance} 
-                    for sn, e in current().evidences.items()})
+@app.route("/get_state")
+def get_state():
+    return jsonify(app_state())
 
 @app.route("/hypo_score")
 def hypo_score():
@@ -64,7 +64,7 @@ def hypo_score():
 def add_hypo():
     h_sn = current().add_hypothesis()
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return jsonify(h_sn=h_sn)
+        return jsonify(app_state())
     return redirect(url_for('index'))
 
 @app.route("/name_hypo")
@@ -80,7 +80,7 @@ def name_hypo():
 def add_evidence():
     e_sn = current().add_evidence()
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return jsonify(e_sn=e_sn)
+        return jsonify(app_state())
     return redirect(url_for('index'))
 
 @app.route("/name_evidence")
@@ -116,10 +116,9 @@ def switch_session():
     workspace_id = request.args.get('session')
     if workspace_id in session['workspaces']:
         session['current'] = workspaces[workspace_id]
-        return jsonify(success=True)
+        return jsonify(app_state())
     else:
         return jsonify(success=False)
-        return redirect(url_for('index'))
 
 if __name__ == "__main__":
     app.debug = True
