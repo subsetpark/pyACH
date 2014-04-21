@@ -30,7 +30,8 @@ class ACH:
             evidence: {}
             hypotheses: {}
             matrix: {}
-            """.format(self.sn, self.evidences, self.hypotheses, self.matrix))
+            """.format(self.sn, "\t\n".join("{}: {}".format(e.sn, e.content) for e in self.evidences.values()), 
+                self.hypotheses, self.matrix))
 
     def __str__(self):
         return "Analysis of Competing Hypotheses: \n{}\n".format(" ".join(self.hypotheses), " ".join(self.evidences))
@@ -53,11 +54,13 @@ class ACH:
         return e.sn
 
     def name_evidence(self, evidence, content):
-        self.evidences[evidence].content = content
+        e = self.evidences[evidence]
+        e.content = content
         if DEBUG:
-            print("naming evidence {}: {}".format(self.evidences[evidence],
-                                                  self.evidences[evidence].content))
+            print("naming evidence {}: {}".format(e.sn,
+                                                  e.content))
             self.debug()
+
 
     def get_h_cells(self, hypo):
         return (cell for cell in self.matrix[hypo].values())
