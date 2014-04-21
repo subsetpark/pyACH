@@ -22,30 +22,15 @@ Current session: {{ session }}
 {% endfor %}
 </ul>
 
+<div id="comp_table">
 <table id="comp_hypothesis_table">
-<thead>
-<tr>
-<th>Evidence no</th>
-<th>Enter Evidence</th>
-<th>Credibility</th>
-<th>Relevance</th>
-</tr>
-</thead>
-<tbody>
-</tbody>
 </table>
+</div>
 <button id="newevi">Add Evidence</button>
 <button id="newhypo">New Hypothesis</button>
 
 
 <script>
-$("#newhypo").click(function(data, status){
-	$.get("/add_hypothesis", function(data, status){
-		$("#comp_hypothesis_table thead tr").append($("<th>").append(data.h_sn));
-		$("#comp_hypothesis_table tbody tr").append($("<td>"))
-	})
-})
-
 function name_e(){
 	var e_sn = $(this).parents("tr").find(".e_sn").text();
 	var e_name = $(this).val();
@@ -56,25 +41,51 @@ function name_e(){
 	$.get("name_evidence", obj, console.log("success"))
 	}
 
-$("#newevi").click(function(data, status){
-		var hypo_num = 0;
-		$.get("/get_hypotheses", function(data, status){
-			hypo_num = Object.keys(data).length
-		})
-		$.get("/add_evidence", function(data, status){
-				var row = ($("<tr>")
-				.append($("<td>").append(data.e_sn).addClass("e_sn"))
+
+function render_table(app_state){
+		console.log(app_state)
+		var table = ($("<table>").attr("id", "comp_hypothesis_table")
+			.append($("<thead>")
+			.append($("<tr>")
+			.append($("<th>").append("Evidence"))
+			.append($("<th>").append("Enter Evidence"))
+			.append($("<th>").append("Credibility"))
+			.append($("<th>").append("Relevance"))))
+			.append($("<tbody>")))
+
+		for (var h in app_state.hypotheses){
+			table.find("thead tr").append($("<th>").append(app_state.hypotheses[h].sn))
+		}
+
+		for (var e in app_state.evidences){
+			var row = ($("<tr>")
+				.append($("<td>").append(app_state.evidences[e].sn).addClass("e_sn"))
 				.append($("<td>").append($("<input>").attr("type", "text").addClass("e_name").change(name_e)))
 				.append($("<td>")
 				.append("<select><option value='low'>Low</option><option value='medium'>Medium</option><option value=high>High</option>"))
 				.append($("<td>")
 				.append("<select><option value='low'>Low</option><option value='medium'>Medium</option><option value=high>High</option>"))
-			);
-			for (i=0; i<hypo_num; i++){
-				row.append($("<td>"))
+				);
+			for (var h in app_state.hypotheses){
+				// row.append($("<td>"))
+				row.append($("<td>").append("FOO"))
+				}
+			table.append(row)
 			}
-			$("#comp_hypothesis_table tbody").append(row)
+		$("#comp_hypothesis_table").replaceWith(table)
+	}		
+	
+
+$("#newevi").click(function(data, status){
+		$.get("/add_evidence", function(app_state, app_status){
+			render_table(app_state)
 		})
 	})
+
+$("#newhypo").click(function(data, status){
+	$.get("/add_hypothesis", function(app_state){
+		render_table(app_state)
+	})
+})
 </script>
 {% endblock %}
