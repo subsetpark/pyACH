@@ -22,46 +22,6 @@ Current session: {{ session }}
 {% endfor %}
 </ul>
 
-<script>
-
-$(document).ready(function(){
-	$("#newhypo").click(function(data, status){
-		$.get("/add_hypothesis", function(data, status){
-			$("#comp_hypothesis_table thead tr").append($("<th>").append(data.h_sn));
-			$("#comp_hypothesis_table tbody tr").append($("<td>"))
-		})
-
-	})
-
-})
-
-$(document).ready(function(){
-	$("#newevi").click(function(data, status){
-		var hypo_num = 0;
-		$.get("/get_hypotheses", function(data, status){
-			hypo_num = Object.keys(data).length
-		})
-		$.get("/add_evidence", function(data, status){
-				var row = ($("<tr>")
-				.append($("<td>").append(data.e_sn))
-				.append($("<td>").append($("<input>").attr("type", "text")))
-				.append($("<td>")
-				.append("<select><option value='low'>Low</option><option value='medium'>Medium</option><option value=high>High</option>"))
-				.append($("<td>")
-				.append("<select><option value='low'>Low</option><option value='medium'>Medium</option><option value=high>High</option>"))
-
-			);
-			for (i=0; i<hypo_num; i++){
-				row.append($("<td>"))
-			}
-			$("#comp_hypothesis_table tbody").append(row)
-		})
-	})
-})
-
-
-
-</script>
 <table id="comp_hypothesis_table">
 <thead>
 <tr>
@@ -77,4 +37,44 @@ $(document).ready(function(){
 <button id="newevi">Add Evidence</button>
 <button id="newhypo">New Hypothesis</button>
 
+
+<script>
+$("#newhypo").click(function(data, status){
+	$.get("/add_hypothesis", function(data, status){
+		$("#comp_hypothesis_table thead tr").append($("<th>").append(data.h_sn));
+		$("#comp_hypothesis_table tbody tr").append($("<td>"))
+	})
+})
+
+function name_e(){
+	var e_sn = $(this).parents("tr").find(".e_sn").text();
+	var e_name = $(this).val();
+	var obj = {
+		evidence : e_sn,
+		content : e_name
+		};
+	$.get("name_evidence", obj, console.log("success"))
+	}
+
+$("#newevi").click(function(data, status){
+		var hypo_num = 0;
+		$.get("/get_hypotheses", function(data, status){
+			hypo_num = Object.keys(data).length
+		})
+		$.get("/add_evidence", function(data, status){
+				var row = ($("<tr>")
+				.append($("<td>").append(data.e_sn).addClass("e_sn"))
+				.append($("<td>").append($("<input>").attr("type", "text").addClass("e_name").change(name_e)))
+				.append($("<td>")
+				.append("<select><option value='low'>Low</option><option value='medium'>Medium</option><option value=high>High</option>"))
+				.append($("<td>")
+				.append("<select><option value='low'>Low</option><option value='medium'>Medium</option><option value=high>High</option>"))
+			);
+			for (i=0; i<hypo_num; i++){
+				row.append($("<td>"))
+			}
+			$("#comp_hypothesis_table tbody").append(row)
+		})
+	})
+</script>
 {% endblock %}
