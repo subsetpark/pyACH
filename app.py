@@ -85,7 +85,7 @@ def add_evidence():
 
 @app.route("/name_evidence")
 def name_evidence():
-    current().evidences[request.args.get('evidence')].content = request.args.get('content')
+    current().name_evidence(request.args.get('evidence'), request.args.get('content'))
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return jsonify(success=True)
     return redirect(url_for('index'))
