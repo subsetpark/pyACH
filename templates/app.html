@@ -33,8 +33,14 @@ function name_e(){
 	$.get("name_evidence", obj, console.log("success"))
 	}
 
+function KeySort(a, b){
+	var x = a.slice(1)
+	var y = b.slice(1)
+	return x - y;
+}
 
 function redraw(app_state){
+		
 		console.log(app_state)
 		var selecter = $("<select>").append("id", "session_select")
 		for (var a in app_state.sessions){
@@ -55,18 +61,24 @@ function redraw(app_state){
 		for (var h in app_state.hypotheses){
 			table.find("thead tr").append($("<th>").append(app_state.hypotheses[h].sn))
 		}
-
-		for (var e in app_state.evidences){
+		var evidences = Object.keys(app_state.evidences)
+		evidences.sort(KeySort)
+		for (var e in evidences){
+			var key = evidences[e]
+			var evidence = app_state.evidences[key]
 			var row = ($("<tr>")
-				.append($("<td>").append(app_state.evidences[e].sn).addClass("e_sn"))
-				.append($("<td>").append($("<input>").attr("type", "text").addClass("e_name").change(name_e)))
+				.append($("<td>").append(evidence.sn).addClass("e_sn"))
+				.append($("<td>").append($("<input>").attr("type", "text").attr("value", evidence.content).addClass("e_name").change(name_e)))
 				.append($("<td>")
 				.append("<select><option value='low'>Low</option><option value='medium'>Medium</option><option value=high>High</option>"))
 				.append($("<td>")
 				.append("<select><option value='low'>Low</option><option value='medium'>Medium</option><option value=high>High</option>"))
 				);
+			var hypotheses = Object.keys(app_state.hypotheses)
+			hypotheses.sort(KeySort)
 			for (var h in app_state.hypotheses){
-				// row.append($("<td>"))
+				var key = hypotheses[e]
+				var hypothesis = app_state.hypotheses[key]
 				row.append($("<td>").append("FOO"))
 				}
 			table.append(row)
