@@ -1,12 +1,18 @@
 #! /usr/bin/env python3
 
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for, escape
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for, escape, make_response
 import ach, pickle
 
 app = Flask(__name__)
 app.config.from_object(__name__)
 
 ach.DEBUG = True
+
+with open('ach_db', 'rb') as f:
+    try:
+        workspaces = pickle.load(f)
+    except EOFError:
+        workspaces = {}
 
 def app_state():
     d = {}
@@ -20,11 +26,17 @@ def app_state():
 def current():
     return workspaces[session['current']]
 
-with open('ach_db', 'rb') as f:
-    try:
-        workspaces = pickle.load(f)
-    except EOFError:
-        workspaces = {}
+@app.route("/flush")
+def flush():
+    workspaces.clear()
+    session.clear()
+    with open('ach_db', 'wb') as f:
+        pickle.dump(workspaces, f)
+    print(session and "No session")
+    print(workspaces and "No workspaces")
+    resp = make_response(jsonify(success=True))
+    resp.set_cookie('session', expires=0)
+    return resp
 
 @app.route("/")
 def index():
@@ -115,7 +127,7 @@ def set_consistency():
 def switch_session():
     workspace_id = request.args.get('session')
     if workspace_id in session['workspaces']:
-        session['current'] = workspaces[workspace_id]
+        session['current'] = workspace_id
         return jsonify(app_state())
     else:
         return jsonify(success=False)
