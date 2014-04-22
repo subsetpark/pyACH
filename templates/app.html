@@ -63,28 +63,28 @@ function set_cred(){
 	var obj = {
 		evidence : sn,
 		cred : level
-	}
+		}
 	$.get("/set_cred", obj, redraw)
-}
+	}
+
 function set_rel(){
 	var sn = $(this).attr('id').slice(0, -"_rel".length)
 	var level = $(this).val()
 	var obj = {
 		evidence : sn,
 		rel : level
-	}
+		}
 	$.get("/set_rel", obj, redraw)
-}
+	}
+
 function redraw(app_state){
-		
-		console.log(app_state)
 		var selecter = $("<select>").attr("id", "session_select").change(select_sess).append($("<option>").append("Select Session"))
 		for (var a in app_state.sessions){
 			sn = "A" + a
  			selecter.append($("<option>").attr("value", sn).append(sn))
 		}
 		$("#session_select").replaceWith(selecter)
-		$("#session_title").replaceWith($("<div>").attr("id", "session_title").append(app_state.session))
+		$("#session_title").replaceWith($("<div>").attr("id", "session_title").append($("<h2>").append(app_state.session)))
 		var table = ($("<table>").attr("id", "comp_hypothesis_table")
 			.append($("<thead>")
 			.append($("<tr>").append($("<td>")).append($("<td>")).append($("<td>")).append($("<td>")).attr("id", "hypo_names"))
@@ -127,6 +127,9 @@ function redraw(app_state){
 			row.append(cred_select);
 			row.append(rel_select);
 			for (var h in app_state.hypotheses){
+				var key = hypotheses[h]
+				var hypothesis = app_state.hypotheses[key]
+				// var cell = $("<td>").append($("<select>").append($("<option>").append("--")).append($("<option>").attr("id", hypothesis.))))
 				row.append($("<td>").append("FOO"))
 				}
 			table.append(row)

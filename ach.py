@@ -45,7 +45,7 @@ class ACH:
             self.debug()
         return h.sn
 
-    def add_evidence(self, cred=None, rel=None, content=None):
+    def add_evidence(self, cred=MEDIUM, rel=MEDIUM, content=None):
         e = Evidence(self, 'E' + str(next(self.e_serializer)), content, cred=cred, rel=rel)
         self.evidences[e.sn] = e
         if DEBUG:
@@ -86,7 +86,7 @@ class ACH:
             self.debug()
 
     def get_h_cells(self, hypo):
-        return (cell for cell in self.matrix[hypo].values())
+        return self.matrix[hypo].values()
 
     def get_e_cells(self, evidence):
         return (row[evidence] for row in self.matrix.values())
@@ -101,13 +101,13 @@ class ACH:
             self.debug()
 
     def get_score(self, hypo):
-        return sum(cell.score() for cell in self.get_h_cells(hypo))
+        return sum(cell.get_score() for cell in self.get_h_cells(hypo))
 
     def duplicate(self):
         return copy.deepcopy(self)
 
 class Evidence:
-    def __init__(self, ach, sn, content, cred=None, rel=None):
+    def __init__(self, ach, sn, content, cred, rel):
         self.sn = sn
         self.credibility = cred
         self.relevance = rel
