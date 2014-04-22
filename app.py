@@ -83,7 +83,7 @@ def add_hypo():
 def name_hypo():
     hypo = request.args.get('hypo')
     content = request.args.get('content')
-    current().hypotheses[hypo].content = content
+    current().name_hypo(hypo, content)
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return jsonify(success=True)
     return redirect(url_for('index'))

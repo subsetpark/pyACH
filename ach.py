@@ -61,6 +61,14 @@ class ACH:
                                                   e.content))
             self.debug()
 
+    def name_hypo(self, hypothesis, content):
+        h = self.hypotheses[hypothesis]
+        h.content = content
+        if DEBUG:
+            print("Naming hypothesis {}: {}".format(h.sn,
+                                                    h.content))
+            self.debug()
+
 
     def get_h_cells(self, hypo):
         return (cell for cell in self.matrix[hypo].values())
