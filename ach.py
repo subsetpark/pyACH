@@ -27,10 +27,10 @@ class ACH:
     def debug(self):
         print("""
             {} current state
-            evidence: {}
+            evidence: \n{}
             hypotheses: {}
             matrix: {}
-            """.format(self.sn, "\t\n".join("{}: {}".format(e.sn, e.content) for e in self.evidences.values()), 
+            """.format(self.sn, "\t\n".join("\t{}: {} / {} / {}".format(e.sn, e.content, e.credibility, e.relevance) for e in self.evidences.values()), 
                 self.hypotheses, self.matrix))
 
     def __str__(self):
@@ -69,6 +69,21 @@ class ACH:
                                                     h.content))
             self.debug()
 
+    def set_cred(self, evidence, level):
+        e = self.evidences[evidence]
+        e.credibility = level
+        if DEBUG:
+            print("Setting evidence {} credibility: {}".format(e.sn,
+                                                               e.credibility))
+            self.debug()
+
+    def set_rel(self, evidence, level):
+        e = self.evidences[evidence]
+        e.relevance = level
+        if DEBUG:
+            print("Setting evidence {} relevance: {}".format(e.sn,
+                                                               e.relevance))
+            self.debug()
 
     def get_h_cells(self, hypo):
         return (cell for cell in self.matrix[hypo].values())
@@ -97,6 +112,22 @@ class Evidence:
         self.credibility = cred
         self.relevance = rel
         self.content = content
+
+    def cred(self):
+        if self.credibility == HIGH:
+            return "high"
+        if self.credibility == MEDIUM:
+            return "medium"
+        if self.credibility == LOW:
+            return "low"
+
+    def rel(self):
+        if self.relevance == HIGH:
+            return "high"
+        if self.relevance == MEDIUM:
+            return "medium"
+        if self.relevance == LOW:
+            return "low"
 
     def __repr__(self):
         return "Evidence {}".format(self.sn)

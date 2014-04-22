@@ -23,6 +23,12 @@ border:1px solid black;
 
 
 <script>
+function KeySort(a, b){
+	var x = a.slice(1)
+	var y = b.slice(1)
+	return x - y;
+	}
+
 function name_e(){
 	var e_sn = $(this).parents("tr").find(".e_sn").text();
 	var e_name = $(this).val();
@@ -41,13 +47,7 @@ function name_h(){
 		content : h_name
 		};
 	$.get("name_hypo", obj, console.log("success"))
-}
-
-function KeySort(a, b){
-	var x = a.slice(1)
-	var y = b.slice(1)
-	return x - y;
-}
+	}
 
 function select_sess(){
 	var next_sess = $("#session_select").val()
@@ -55,8 +55,26 @@ function select_sess(){
 		session : next_sess
 		}	
 	$.get("/switch_session", obj, redraw)
-}
+	}
 
+function set_cred(){
+	var sn = $(this).attr('id').slice(0, -"_cred".length)
+	var level = $(this).val()
+	var obj = {
+		evidence : sn,
+		cred : level
+	}
+	$.get("/set_cred", obj, redraw)
+}
+function set_rel(){
+	var sn = $(this).attr('id').slice(0, -"_rel".length)
+	var level = $(this).val()
+	var obj = {
+		evidence : sn,
+		rel : level
+	}
+	$.get("/set_rel", obj, redraw)
+}
 function redraw(app_state){
 		
 		console.log(app_state)
@@ -85,20 +103,29 @@ function redraw(app_state){
 			table.find("#headers").append($("<th>").append(hypothesis.sn))
 			table.find("#hypo_names").append($("<td>").append($("<input>").attr("id", hypothesis.sn).attr("type", "text").attr("value", hypothesis.content).addClass("h_name").change(name_h)))
 		}
+		var hiLowMid = "<option>--</option><option value='low'>Low</option><option value='medium'>Medium</option><option value=high>High</option>"
 		var evidences = Object.keys(app_state.evidences)
 		evidences.sort(KeySort)
+		
 		for (var e in evidences){
 			var key = evidences[e]
 			var evidence = app_state.evidences[key]
-			var row = ($("<tr>")
+			var cred_id = evidence.sn+"_cred"
+			var rel_id = evidence.sn+"_rel"
+			var row = $("<tr>")
 				.append($("<td>").append(evidence.sn).addClass("e_sn"))
 				.append($("<td>").append($("<input>").attr("type", "text").attr("value", evidence.content).addClass("e_name").change(name_e)))
-				.append($("<td>")
-				.append("<select><option value='low'>Low</option><option value='medium'>Medium</option><option value=high>High</option>"))
-				.append($("<td>")
-				.append("<select><option value='low'>Low</option><option value='medium'>Medium</option><option value=high>High</option>"))
-				);
-			
+
+			var cred_select = $("<td>").append($("<select>").append($("<option>").append("--")).append($("<option>").attr("id", evidence.sn+"cred_low").append("low"))
+									   .append($("<option>").attr("id", evidence.sn+"cred_med").append("medium"))
+									   .append($("<option>").attr("id", evidence.sn+"cred_high").append("high")).val(evidence.credibility).attr("id", cred_id).change(set_cred));
+
+			var rel_select = $("<td>").append($("<select>").append($("<option>").append("--")).append($("<option>").attr("id", evidence.sn+"rel_low").append("low"))
+									   .append($("<option>").attr("id", evidence.sn+"rel_med").append("medium"))
+									   .append($("<option>").attr("id", evidence.sn+"rel_high").append("high")).val(evidence.relevance).attr("id", rel_id).change(set_rel));
+			rel_select.val(evidence.relevance)
+			row.append(cred_select);
+			row.append(rel_select);
 			for (var h in app_state.hypotheses){
 				row.append($("<td>").append("FOO"))
 				}
@@ -117,18 +144,19 @@ $("#newevi").click(function(data, status){
 $("#newhypo").click(function(data, status){
 	$.get("/add_hypothesis", function(app_state){
 		redraw(app_state)
+		})
 	})
-})
+
 $("#newsess").click(function(data, status){
 	$.get("/new_session", function(app_state){
 		redraw(app_state)
+		})
 	})
-})
 
 $(document).ready(function(){
 	$.get("/get_state", function(app_state){
 		redraw(app_state)
+		})
 	})
-})
 </script>
 {% endblock %}

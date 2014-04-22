@@ -18,7 +18,7 @@ def app_state():
     d = {}
     d['sessions'] = list(workspaces.keys())
     d['session'] = session['current']
-    d['evidences'] = {sn: {'sn': sn, 'content': e.content, 'credibility': e.credibility, 'relevance': e.relevance} 
+    d['evidences'] = {sn: {'sn': sn, 'content': e.content, 'credibility': e.cred(), 'relevance': e.rel()} 
                     for sn, e in current().evidences.items()}
     d['hypotheses'] = {sn: {'sn': sn, 'content': h.content} for sn, h in current().hypotheses.items()}
     return d
@@ -104,16 +104,34 @@ def name_evidence():
 
 @app.route("/set_cred")
 def set_cred():
-    current().evidences[request.args.get('evidence')].credibility = request.args.get('cred', type=float) 
+    cred = request.args.get('cred')
+    if cred == "low":
+        level = ach.LOW
+    elif cred == "medium":
+        level = ach.MEDIUM
+    elif cred == "high":
+        level = ach.HIGH
+    else:
+        return jsonify(success=False)
+    current().set_cred(request.args.get('evidence'), level)
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return jsonify(success=True)
+        return jsonify(app_state())
     return redirect(url_for('index'))
 
 @app.route("/set_rel")
 def set_rel():
-    current().evidences[request.args.get('evidence')].relevance = request.args.get('rel', type=float)
+    rel = request.args.get('rel')
+    if rel == "low":
+        level = ach.LOW
+    elif rel == "medium":
+        level = ach.MEDIUM
+    elif rel == "high":
+        level = ach.HIGH
+    else:
+        return jsonify(success=False)
+    current().set_rel(request.args.get('evidence'), level)
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return jsonify(success=True)
+        return jsonify(app_state())
     return redirect(url_for('index'))
 
 @app.route("/set_consistency")
