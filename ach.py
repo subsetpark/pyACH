@@ -5,6 +5,7 @@ VERY_C = 0
 CONSISTENT = 0
 VERY_I = 2
 INCONSISTENT = 1
+NEUTRAL = 0
 MEDIUM = 1
 HIGH = math.sqrt(2)
 LOW = math.sqrt(2) / 2
@@ -31,7 +32,7 @@ class ACH:
             hypotheses: {}
             matrix: {}
             """.format(self.sn, "\t\n".join("\t{}: {} / {} / {}".format(e.sn, e.content, e.credibility, e.relevance) for e in self.evidences.values()), 
-                self.hypotheses, self.matrix))
+                self.hypotheses,{k: {h: w.get_score() for h, w in v.items()} for k, v in self.matrix.items()}))
 
     def __str__(self):
         return "Analysis of Competing Hypotheses: \n{}\n".format(" ".join(self.hypotheses), " ".join(self.evidences))
@@ -39,7 +40,10 @@ class ACH:
     def add_hypothesis(self, content=None):
         h = Hypothesis(self, 'H' + str(next(self.h_serializer)), content)
         self.hypotheses[h.sn] = h
-        self.matrix[h.sn] = {}
+
+        for e_sn, d in self.matrix.items():
+            d[h.sn] = Cell(self.hypotheses[h.sn], self.evidences[e_sn])
+        
         if DEBUG:
             print("adding hypothesis {}: {}".format(h.sn, h.content))
             self.debug()
@@ -48,6 +52,10 @@ class ACH:
     def add_evidence(self, cred=MEDIUM, rel=MEDIUM, content=None):
         e = Evidence(self, 'E' + str(next(self.e_serializer)), content, cred=cred, rel=rel)
         self.evidences[e.sn] = e
+        d = {}
+        for h_sn in self.hypotheses:
+            d[h_sn] = Cell(self.hypotheses[h_sn], e)
+        self.matrix[e.sn] = d
         if DEBUG:
             print("adding evidence {}: {}".format(e.sn, e.content))
             self.debug()
@@ -86,18 +94,15 @@ class ACH:
             self.debug()
 
     def get_h_cells(self, hypo):
-        return self.matrix[hypo].values()
+        return (row[hypo] for row in self.matrix.values())
 
     def get_e_cells(self, evidence):
-        return (row[evidence] for row in self.matrix.values())
+        return self.matrix[evidence].values()
 
-    def rate(self, h, e, rating):
-        if not self.matrix[h].get(e):
-            self.matrix[h][e] = Cell(self.hypotheses[h], self.evidences[e], rating=rating)
-        else:
-            self.matrix[h][e].rating = rating
+    def rate(self, h, e, consistency):
+        self.matrix[e][h].set_score(consistency)
         if DEBUG:
-            print("rating {}:{} as {}".format(h, e, rating))
+            print("rating {}:{} as {}".format(h, e, consistency))
             self.debug()
 
     def get_score(self, hypo):
@@ -169,13 +174,39 @@ class Hypothesis:
         return "Hypothesis: {}".format(self.content)
 
 class Cell:
-    def __init__(self, hypo, evidence, rating=None):
+    def __init__(self, hypo, evidence, consistency='--'):
         self.evidence = evidence
         self.hypo = hypo
-        self.rating = rating
+        self.set_score(consistency)
+    
+    def set_score(self, consistency):
+        if consistency == "--":
+            self.consistency = "N"
+            self.rating = NEUTRAL
+        else:
+            if consistency == "II":
+                self.rating = VERY_I
+            elif consistency == "I":
+                self.rating = INCONSISTENT
+            elif consistency == "N":
+                self.rating = NEUTRAL
+            elif consistency == "C":
+                self.rating = CONSISTENT
+            elif consistency == "CC":
+                self.rating == VERY_C
+            self.consistency = consistency
+
 
     def get_score(self):
-        return self.evidence.relevance * self.evidence.credibility * self.rating
+        score = self.evidence.relevance * self.evidence.credibility * self.rating
+        if DEBUG:
+            print("Calculating score for {}:{}:\n\tRelevance {}\n\tCredibility {}\n\tRating {}\n\tScore: {}".format(
+                                                            self.evidence.sn, self.hypo.sn,
+                                                            repr(self.evidence.relevance),
+                                                            repr(self.evidence.credibility),
+                                                            repr(self.rating),
+                                                            repr(score)))
+        return score
 
 if __name__ == "__main__":
     import doctest

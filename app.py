@@ -21,6 +21,8 @@ def app_state():
     d['evidences'] = {sn: {'sn': sn, 'content': e.content, 'credibility': e.cred(), 'relevance': e.rel()} 
                     for sn, e in current().evidences.items()}
     d['hypotheses'] = {sn: {'sn': sn, 'content': h.content} for sn, h in current().hypotheses.items()}
+    d['matrix'] = {k: {h: w.consistency for h, w in v.items()} for k, v in current().matrix.items()}
+    d['scores'] = {sn: current().get_score(sn) for sn, h in current().hypotheses.items()}
     return d
 
 def current():
@@ -99,7 +101,7 @@ def add_evidence():
 def name_evidence():
     current().name_evidence(request.args.get('evidence'), request.args.get('content'))
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return jsonify(success=True)
+        return jsonify(app_state())
     return redirect(url_for('index'))
 
 @app.route("/set_cred")
@@ -136,9 +138,10 @@ def set_rel():
 
 @app.route("/set_consistency")
 def set_consistency():
-    current().rate(request.args.get('h'), request.args.get('e'), request.args.get('rating'))
+    consistency = request.args.get('consistency')
+    current().rate(request.args.get('h'), request.args.get('e'), consistency)
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return jsonify(success=True)
+        return jsonify(app_state())
     return redirect(url_for('index'))
 
 @app.route("/switch_session")
