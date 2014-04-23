@@ -1,5 +1,0 @@
-credentials.py
-.gitignore
-*.pyc
-__pycache__
-ach_db
