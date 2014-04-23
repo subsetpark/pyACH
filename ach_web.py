@@ -21,7 +21,7 @@ else:
 
 def app_state():
     d = {}
-    d['sessions'] = list(workspaces.keys())
+    d['sessions'] = session['workspaces']
     d['session'] = session['current']
     d['evidences'] = {sn: {'sn': sn, 'content': e.content, 'credibility': e.cred(), 'relevance': e.rel()} 
                     for sn, e in current().evidences.items()}
