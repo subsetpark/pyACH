@@ -2,6 +2,8 @@
 
 pyACH is a web app written by [Suraj Kapoor](http://surajkapoor.com) and [Zach Smith](http://zdsmith.com) that implements the [ACH](http://en.wikipedia.org/wiki/Analysis_of_competing_hypotheses)(Analysis of Competing Hypotheses) methodology. 
 
+You can use it at [http://pyach.herokuapp.com](http://pyach.herokuapp.com).
+
 <h2>Instructions</h2>
 
 <p>You can use ACH to help you analyze a situation and avoid cognitive bias. Using ACH you can lay out and weight all the evidence being considered, the hypotheses that are competing to explain the evidence, and finally indicate, according to your own judgment, the degree to which each hypothesis accords with the given evidence.</p>
