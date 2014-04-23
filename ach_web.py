@@ -35,7 +35,9 @@ def current():
 
 @app.route("/flush")
 def flush():
-    workspaces.clear()
+    for w_sn in session['workspaces']:
+        if workspaces.get(w_sn):
+            del workspaces[w_sn]
     session.clear()
     with open('ach_db', 'wb') as f:
         pickle.dump(workspaces, f)
@@ -64,6 +66,8 @@ def new_session():
     workspaces[workspace.sn] = workspace
     session['workspaces'].append(workspace.sn)
     session['current'] = workspace.sn
+    workspace.add_evidence()
+    workspace.add_hypothesis()
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return jsonify(app_state())
     return redirect(url_for('index'))    
@@ -81,7 +85,7 @@ def hypo_score():
 
 @app.route("/add_hypothesis")
 def add_hypo():
-    h_sn = current().add_hypothesis()
+    current().add_hypothesis()
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return jsonify(app_state())
     return redirect(url_for('index'))
@@ -97,7 +101,7 @@ def name_hypo():
 
 @app.route("/add_evidence")
 def add_evidence():
-    e_sn = current().add_evidence()
+    current().add_evidence()
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return jsonify(app_state())
     return redirect(url_for('index'))
