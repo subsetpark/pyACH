@@ -8,12 +8,19 @@ app.config.from_object(__name__)
 
 ach.DEBUG = True
 
-with open('ach_db', 'rb') as f:
-    try:
-        workspaces = pickle.load(f)
-    except EOFError:
-        workspaces = {}
+import credentials
+app.secret_key = credentials.key
 
+import os
+if os.path.isfile('ach_db'):
+    with open('ach_db', 'rb') as f:
+        try:
+            workspaces = pickle.load(f)
+        except EOFError:
+            workspaces = {}
+else:
+    workspaces = {}
+    
 def app_state():
     d = {}
     d['sessions'] = session['workspaces']
@@ -155,6 +162,4 @@ def switch_session():
 
 if __name__ == "__main__":
     app.debug = True
-    # import credentials
-    app.secret_key = "credentials.key"
     app.run()
