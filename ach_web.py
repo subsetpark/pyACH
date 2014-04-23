@@ -6,7 +6,6 @@ import ach, pickle
 app = Flask(__name__)
 app.config.from_object(__name__)
 
-ach.DEBUG = True
 import credentials
 app.secret_key = credentials.key
 
@@ -19,7 +18,6 @@ if os.path.isfile('ach_db'):
             workspaces = {}
 else:
     workspaces = {}
-
 
 def app_state():
     d = {}
@@ -161,5 +159,4 @@ def switch_session():
         return jsonify(success=False)
 
 if __name__ == "__main__":
-    app.debug = True
     app.run()
