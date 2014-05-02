@@ -67,7 +67,7 @@ function set_consistency(){
 function redraw(app_state){
         var selecter = $("<select>").attr("id", "session_select").change(select_sess).append($("<option>").append("Select Session"))
         for (var a in app_state.sessions){
-            sn = app_state.sessions[a]
+            var sn = app_state.sessions[a]
             selecter.append($("<option>").attr("value", sn).append(sn))
         }
         $("#session_select").replaceWith(selecter)
